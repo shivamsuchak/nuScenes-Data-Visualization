@@ -99,10 +99,21 @@ class QualityInspector:
                 message="No sensor data available"
             )
         
+        # Only check supported sensors (cameras and LiDAR, not radar)
+        supported_sensors = [s for s in available_sensors if "CAM" in s or "LIDAR" in s]
+        
+        if not supported_sensors:
+            return QualityCheck(
+                check_name="Sensor Data Integrity",
+                status=QualityStatus.WARNING,
+                message="No supported sensors (camera/LiDAR) available"
+            )
+        
         accessible_count = 0
         failed_sensors = []
         
-        for sensor in available_sensors[:3]:
+        # Check up to 3 supported sensors
+        for sensor in supported_sensors[:3]:
             sensor_data = self.nuscenes_service.get_sensor_data(frame_id, sensor)
             if sensor_data:
                 accessible_count += 1

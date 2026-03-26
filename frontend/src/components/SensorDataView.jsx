@@ -1,10 +1,14 @@
-import { useState } from 'react';
+import { useEffect } from 'react';
 import CameraViewer from './CameraViewer';
 import LiDARViewer from './LiDARViewer';
 import QualityInspector from './QualityInspector';
 
-function SensorDataView({ frameId }) {
-  const [activeView, setActiveView] = useState('camera');
+function SensorDataView({ frameId, activeView = 'camera', onViewChange }) {
+  const handleViewChange = (view) => {
+    if (onViewChange) {
+      onViewChange(view);
+    }
+  };
 
   if (!frameId) {
     return (
@@ -21,19 +25,19 @@ function SensorDataView({ frameId }) {
       <div className="view-selector">
         <button
           className={`view-button ${activeView === 'camera' ? 'active' : ''}`}
-          onClick={() => setActiveView('camera')}
+          onClick={() => handleViewChange('camera')}
         >
           📷 Camera
         </button>
         <button
           className={`view-button ${activeView === 'lidar' ? 'active' : ''}`}
-          onClick={() => setActiveView('lidar')}
+          onClick={() => handleViewChange('lidar')}
         >
           🎯 LiDAR
         </button>
         <button
           className={`view-button ${activeView === 'quality' ? 'active' : ''}`}
-          onClick={() => setActiveView('quality')}
+          onClick={() => handleViewChange('quality')}
         >
           🔍 Quality
         </button>

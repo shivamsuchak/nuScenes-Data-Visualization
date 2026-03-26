@@ -15,6 +15,18 @@ function LiDARViewer({ frameId }) {
   const [pointCount, setPointCount] = useState(0);
 
   const mouseRef = useRef({ x: 0, y: 0, isDown: false });
+  const initialCameraPosition = useRef({ x: 0, y: 10, z: 30 });
+
+  const resetCamera = () => {
+    if (cameraRef.current) {
+      cameraRef.current.position.set(
+        initialCameraPosition.current.x,
+        initialCameraPosition.current.y,
+        initialCameraPosition.current.z
+      );
+      cameraRef.current.lookAt(0, 0, 0);
+    }
+  };
 
   useEffect(() => {
     if (frameId) {
@@ -222,8 +234,22 @@ function LiDARViewer({ frameId }) {
         )}
       </div>
 
+      {/* Interaction Hints */}
+      {!loading && !error && (
+        <div className="interaction-hints">
+          <span>🖱️ Drag to rotate</span>
+          <span>🔍 Scroll to zoom</span>
+          <button className="reset-camera-btn" onClick={resetCamera}>
+            Reset View
+          </button>
+        </div>
+      )}
+
       {loading && (
-        <div className="loading">Loading LiDAR data...</div>
+        <div className="loading">
+          Loading LiDAR data...
+          <p className="loading-detail">Rendering point cloud...</p>
+        </div>
       )}
 
       {error && (
