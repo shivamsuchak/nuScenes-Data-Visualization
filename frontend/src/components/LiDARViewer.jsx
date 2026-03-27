@@ -13,18 +13,71 @@ function LiDARViewer({ frameId }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [pointCount, setPointCount] = useState(0);
+  const [showGrid, setShowGrid] = useState(true);
+  const [showAxes, setShowAxes] = useState(true);
 
   const mouseRef = useRef({ x: 0, y: 0, isDown: false });
   const initialCameraPosition = useRef({ x: 0, y: 10, z: 30 });
+  const gridHelperRef = useRef(null);
+  const axesHelperRef = useRef(null);
 
-  const resetCamera = () => {
-    if (cameraRef.current) {
-      cameraRef.current.position.set(
-        initialCameraPosition.current.x,
-        initialCameraPosition.current.y,
-        initialCameraPosition.current.z
-      );
-      cameraRef.current.lookAt(0, 0, 0);
+  const setCameraPreset = (preset) => {
+    if (!cameraRef.current) return;
+    
+    const camera = cameraRef.current;
+    let targetPosition;
+    
+    switch(preset) {
+      case 'top':
+        targetPosition = { x: 0, y: 50, z: 0.1 };
+        break;
+      case 'side':
+        targetPosition = { x: 50, y: 10, z: 0 };
+        break;
+      case 'front':
+        targetPosition = { x: 0, y: 10, z: 50 };
+        break;
+      case 'iso':
+        targetPosition = { x: 30, y: 30, z: 30 };
+        break;
+      case 'reset':
+      default:
+        targetPosition = initialCameraPosition.current;
+    }
+    
+    // Smooth transition
+    const startPos = camera.position.clone();
+    const endPos = new THREE.Vector3(targetPosition.x, targetPosition.y, targetPosition.z);
+    const duration = 500; // ms
+    const startTime = Date.now();
+    
+    const animateCamera = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+      
+      camera.position.lerpVectors(startPos, endPos, eased);
+      camera.lookAt(0, 0, 0);
+      
+      if (progress < 1) {
+        requestAnimationFrame(animateCamera);
+      }
+    };
+    
+    animateCamera();
+  };
+
+  const toggleGrid = () => {
+    if (gridHelperRef.current) {
+      gridHelperRef.current.visible = !showGrid;
+      setShowGrid(!showGrid);
+    }
+  };
+
+  const toggleAxes = () => {
+    if (axesHelperRef.current) {
+      axesHelperRef.current.visible = !showAxes;
+      setShowAxes(!showAxes);
     }
   };
 
@@ -63,9 +116,11 @@ function LiDARViewer({ frameId }) {
     containerRef.current.appendChild(renderer.domElement);
 
     const gridHelper = new THREE.GridHelper(100, 20, 0x444444, 0x222222);
+    gridHelperRef.current = gridHelper;
     scene.add(gridHelper);
 
     const axesHelper = new THREE.AxesHelper(10);
+    axesHelperRef.current = axesHelper;
     scene.add(axesHelper);
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
@@ -234,14 +289,43 @@ function LiDARViewer({ frameId }) {
         )}
       </div>
 
-      {/* Interaction Hints */}
+      {/* Camera Presets */}
       {!loading && !error && (
-        <div className="interaction-hints">
-          <span>🖱️ Drag to rotate</span>
-          <span>🔍 Scroll to zoom</span>
-          <button className="reset-camera-btn" onClick={resetCamera}>
-            Reset View
-          </button>
+        <div className="lidar-controls">
+          <div className="camera-presets">
+            <span className="control-label">View:</span>
+            <button className="preset-btn" onClick={() => setCameraPreset('top')}>
+              📐 Top
+            </button>
+            <button className="preset-btn" onClick={() => setCameraPreset('side')}>
+              ↔️ Side
+            </button>
+            <button className="preset-btn" onClick={() => setCameraPreset('front')}>
+              ⬆️ Front
+            </button>
+            <button className="preset-btn" onClick={() => setCameraPreset('iso')}>
+              🔷 Isometric
+            </button>
+            <button className="preset-btn preset-reset" onClick={() => setCameraPreset('reset')}>
+              🔄 Reset
+            </button>
+          </div>
+          
+          <div className="lidar-toggles">
+            <span className="control-label">Display:</span>
+            <button 
+              className={`toggle-btn ${showGrid ? 'active' : ''}`}
+              onClick={toggleGrid}
+            >
+              {showGrid ? '✓' : '○'} Grid
+            </button>
+            <button 
+              className={`toggle-btn ${showAxes ? 'active' : ''}`}
+              onClick={toggleAxes}
+            >
+              {showAxes ? '✓' : '○'} Axes
+            </button>
+          </div>
         </div>
       )}
 
@@ -263,8 +347,15 @@ function LiDARViewer({ frameId }) {
       />
 
       <div className="lidar-controls-info">
-        <p><strong>Controls:</strong> Drag to rotate • Scroll to zoom</p>
-        <p><strong>Color:</strong> Height-based (blue=low, red=high)</p>
+        <div className="control-info-item">
+          <strong>🖱️ Controls:</strong> Drag to rotate • Scroll to zoom
+        </div>
+        <div className="control-info-item">
+          <strong>🎨 Color:</strong> Height-based (blue=low, red=high)
+        </div>
+        <div className="control-info-item">
+          <strong>💡 Tip:</strong> Use preset views for quick navigation
+        </div>
       </div>
     </div>
   );
