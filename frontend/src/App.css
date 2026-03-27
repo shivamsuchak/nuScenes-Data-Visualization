@@ -73,7 +73,7 @@
   /* Layout dimensions */
   --topbar-h:   48px;
   --tabbar-h:   40px;
-  --timeline-h: 60px;
+  --timeline-h: 64px;
   --sidebar-w:  220px;
 
   /* Z-index */
@@ -508,6 +508,56 @@ body {
   border-radius: 2px;
 }
 
+/* ============================================
+   PLAYBACK VIEW (Camera + LiDAR side-by-side)
+   ============================================ */
+
+.view-content.playback-view {
+  display: flex;
+  gap: 1px;
+  background: var(--border);
+  padding: 0;
+  overflow: hidden;
+}
+
+.playback-panel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+  background: var(--bg-0);
+}
+
+.playback-cameras { flex: 1.4; }
+.playback-lidar   { flex: 1; }
+
+.playback-panel-header {
+  height: 30px;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--s4);
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: var(--t-xs);
+  font-weight: 600;
+  color: var(--text-1);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+  gap: var(--s2);
+}
+
+.playback-panel-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--s3);
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 /* Split View */
 .view-content.split-view {
   display: flex;
@@ -625,6 +675,65 @@ body {
 .timeline-nav-btn:disabled {
   opacity: 0.3;
   cursor: not-allowed;
+}
+
+/* Play / Pause button */
+.timeline-play-btn {
+  width: 32px;
+  height: 32px;
+  background: var(--primary);
+  border: none;
+  border-radius: 50%;
+  color: white;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 100ms, transform 100ms;
+  letter-spacing: -2px;
+}
+
+.timeline-play-btn:hover:not(:disabled) {
+  background: var(--primary-hover);
+  transform: scale(1.08);
+}
+
+.timeline-play-btn.playing {
+  background: var(--cyan);
+}
+
+.timeline-play-btn.playing:hover:not(:disabled) {
+  background: var(--cyan-hover);
+}
+
+.timeline-play-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Speed button */
+.timeline-speed-btn {
+  padding: 3px var(--s2);
+  background: var(--bg-3);
+  border: 1px solid var(--border-muted);
+  border-radius: var(--r2);
+  color: var(--text-1);
+  font-size: var(--t-xs);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 80ms;
+  white-space: nowrap;
+  min-width: 36px;
+  text-align: center;
+}
+
+.timeline-speed-btn:hover {
+  background: var(--bg-4);
+  color: var(--text-0);
 }
 
 .timeline-scrubber {
@@ -1285,6 +1394,7 @@ body {
   .scene-sidebar  { display: none; }
   .camera-grid    { grid-template-columns: 1fr; }
   .view-content.split-view { flex-direction: column; }
+  .view-content.playback-view { flex-direction: column; }
   .topbar-scene-info { display: none; }
   .topbar-status  { display: none; }
 }

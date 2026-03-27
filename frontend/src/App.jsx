@@ -9,7 +9,7 @@ function App() {
   const [selectedFrame, setSelectedFrame] = useState(null);
   const [currentFrameIndex, setCurrentFrameIndex] = useState(0);
   const [totalFrames, setTotalFrames] = useState(0);
-  const [activeView, setActiveView] = useState('camera');
+  const [activeView, setActiveView] = useState('playback');
   const frameNavRef = useRef(null);
 
   const handleSceneSelect = (scene) => {
@@ -31,9 +31,11 @@ function App() {
       switch (e.key) {
         case 'ArrowLeft':  frameNavRef.current?.prev(); break;
         case 'ArrowRight': frameNavRef.current?.next(); break;
-        case '1': setActiveView('camera');  break;
-        case '2': setActiveView('lidar');   break;
-        case '3': setActiveView('quality'); break;
+        case ' ':          e.preventDefault(); frameNavRef.current?.togglePlay(); break;
+        case '1': setActiveView('playback'); break;
+        case '2': setActiveView('camera');   break;
+        case '3': setActiveView('lidar');    break;
+        case '4': setActiveView('quality');  break;
       }
     };
     window.addEventListener('keydown', handleKeyPress);
