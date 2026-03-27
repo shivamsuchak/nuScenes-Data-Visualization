@@ -40,5 +40,11 @@ frontend/build/
 .env.local
 .env.*.local
 
+# Internal planning/docs (keep only README.md)
+outline.md
+plan.md
+ux_plan.md
+docs/TESTING_RESULTS.md
+
 # Data - exclude entire data folder (large dataset ~4GB)
 data/
