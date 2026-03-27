@@ -1,142 +1,114 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import apiService from '../services/api';
 
-function FrameNavigator({ sceneId, onFrameSelect, currentFrameIndex }) {
+const FrameNavigator = forwardRef(function FrameNavigator(
+  { sceneId, onFrameSelect, currentFrameIndex, currentFrame },
+  ref
+) {
   const [frames, setFrames] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (sceneId) {
-      loadFrames();
-    } else {
-      setFrames([]);
-    }
+    if (sceneId) loadFrames();
+    else setFrames([]);
   }, [sceneId]);
 
   const loadFrames = async () => {
     try {
       setLoading(true);
-      setError(null);
       const data = await apiService.getFrames(sceneId);
-      setFrames(data.frames || []);
-      if (data.frames && data.frames.length > 0) {
-        onFrameSelect(data.frames[0], 0);
-      }
+      const list = data.frames || [];
+      setFrames(list);
+      if (list.length > 0) onFrameSelect(list[0], 0, list.length);
     } catch (err) {
-      setError('Failed to load frames: ' + err.message);
       console.error('Error loading frames:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handlePrevious = () => {
-    if (currentFrameIndex > 0) {
-      const newIndex = currentFrameIndex - 1;
-      onFrameSelect(frames[newIndex], newIndex);
+  const goTo = (index) => {
+    if (index >= 0 && index < frames.length) {
+      onFrameSelect(frames[index], index, frames.length);
     }
   };
 
-  const handleNext = () => {
-    if (currentFrameIndex < frames.length - 1) {
-      const newIndex = currentFrameIndex + 1;
-      onFrameSelect(frames[newIndex], newIndex);
-    }
-  };
+  useImperativeHandle(ref, () => ({
+    prev: () => goTo(currentFrameIndex - 1),
+    next: () => goTo(currentFrameIndex + 1),
+  }));
 
-  const handleFrameClick = (frame, index) => {
-    onFrameSelect(frame, index);
-  };
+  const progress = frames.length > 1
+    ? (currentFrameIndex / (frames.length - 1)) * 100
+    : 0;
 
-  if (!sceneId) {
-    return (
-      <div className="frame-navigator">
-        <h3>Frame Navigator</h3>
-        <div className="info-message">Select a scene to view frames</div>
-      </div>
-    );
-  }
+  const ts = currentFrame?.timestamp
+    ? new Date(currentFrame.timestamp * 1000).toLocaleTimeString()
+    : null;
 
-  if (loading) {
-    return (
-      <div className="frame-navigator">
-        <h3>Frame Navigator</h3>
-        <div className="loading">Loading frames...</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="frame-navigator">
-        <h3>Frame Navigator</h3>
-        <div className="error">{error}</div>
-        <button onClick={loadFrames}>Retry</button>
-      </div>
-    );
-  }
-
-  if (frames.length === 0) {
-    return (
-      <div className="frame-navigator">
-        <h3>Frame Navigator</h3>
-        <div className="info-message">No frames available</div>
-      </div>
-    );
-  }
+  const MAX_DOTS = 120;
+  const dotsToShow = frames.length > MAX_DOTS
+    ? frames.filter((_, i) => i % Math.ceil(frames.length / MAX_DOTS) === 0)
+    : frames;
 
   return (
-    <div className="frame-navigator">
-      <h3>Frame Navigator</h3>
-      
-      <div className="frame-controls">
-        <button 
-          onClick={handlePrevious} 
-          disabled={currentFrameIndex === 0}
-          className="nav-button"
+    <div className="timeline-bar">
+      <button
+        className="timeline-nav-btn"
+        onClick={() => goTo(currentFrameIndex - 1)}
+        disabled={currentFrameIndex === 0 || frames.length === 0}
+        title="Previous frame (←)"
+      >
+        ‹
+      </button>
+
+      <div className="timeline-scrubber">
+        <div
+          className="timeline-track"
+          onClick={(e) => {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const ratio = (e.clientX - rect.left) / rect.width;
+            goTo(Math.round(ratio * (frames.length - 1)));
+          }}
         >
-          ← Previous
-        </button>
-        
-        <div className="frame-counter">
-          Frame {currentFrameIndex + 1} / {frames.length}
+          <div className="timeline-fill" style={{ width: `${progress}%` }} />
+          <div className="timeline-thumb" style={{ left: `${progress}%` }} />
         </div>
-        
-        <button 
-          onClick={handleNext} 
-          disabled={currentFrameIndex === frames.length - 1}
-          className="nav-button"
-        >
-          Next →
-        </button>
+
+        <div className="timeline-dots">
+          {dotsToShow.map((frame, dotIdx) => {
+            const realIndex = frames.indexOf(frame);
+            return (
+              <div
+                key={frame.frame_id}
+                className={`timeline-dot ${realIndex === currentFrameIndex ? 'active' : ''}`}
+                onClick={() => goTo(realIndex)}
+                title={`Frame ${realIndex + 1}`}
+              />
+            );
+          })}
+        </div>
       </div>
 
-      <div className="frame-info">
-        {frames[currentFrameIndex] && (
-          <>
-            <div className="frame-id">
-              <strong>Frame ID:</strong> {frames[currentFrameIndex].frame_id.substring(0, 8)}...
-            </div>
-            <div className="frame-timestamp">
-              <strong>Timestamp:</strong> {new Date(frames[currentFrameIndex].timestamp * 1000).toLocaleString()}
-            </div>
-          </>
-        )}
+      <div className="timeline-meta">
+        <div className="timeline-counter">
+          <span className="cur">{String(currentFrameIndex + 1).padStart(3, '0')}</span>
+          {frames.length > 0 && ` / ${frames.length}`}
+        </div>
+        {ts && <div className="timeline-ts">{ts}</div>}
+        {loading && <div className="timeline-ts">Loading…</div>}
       </div>
 
-      <div className="frame-timeline">
-        {frames.map((frame, index) => (
-          <div
-            key={frame.frame_id}
-            className={`timeline-marker ${index === currentFrameIndex ? 'active' : ''}`}
-            onClick={() => handleFrameClick(frame, index)}
-            title={`Frame ${index + 1}`}
-          />
-        ))}
-      </div>
+      <button
+        className="timeline-nav-btn"
+        onClick={() => goTo(currentFrameIndex + 1)}
+        disabled={currentFrameIndex >= frames.length - 1 || frames.length === 0}
+        title="Next frame (→)"
+      >
+        ›
+      </button>
     </div>
   );
-}
+});
 
 export default FrameNavigator;

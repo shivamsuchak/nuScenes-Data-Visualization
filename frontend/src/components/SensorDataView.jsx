@@ -3,81 +3,92 @@ import CameraViewer from './CameraViewer';
 import LiDARViewer from './LiDARViewer';
 import QualityInspector from './QualityInspector';
 
+const TABS = [
+  { id: 'camera',  label: 'Cameras',         icon: '⬡' },
+  { id: 'lidar',   label: 'LiDAR',            icon: '◎' },
+  { id: 'quality', label: 'Quality',          icon: '⬕' },
+];
+
 function SensorDataView({ frameId, activeView = 'camera', onViewChange }) {
-  const [layoutMode, setLayoutMode] = useState('single'); // 'single' or 'split'
-  const handleViewChange = (view) => {
-    if (onViewChange) {
-      onViewChange(view);
-    }
-  };
+  const [layoutMode, setLayoutMode] = useState('single');
 
   if (!frameId) {
     return (
-      <div className="sensor-data-view">
-        <div className="placeholder">
-          <p>Select a scene and frame to view sensor data</p>
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <div className="view-tabbar">
+          {TABS.map(tab => (
+            <button
+              key={tab.id}
+              className={`view-tab ${activeView === tab.id ? 'active' : ''}`}
+              onClick={() => onViewChange?.(tab.id)}
+            >
+              <span style={{ fontFamily: 'monospace' }}>{tab.icon}</span>
+              {tab.label}
+            </button>
+          ))}
+        </div>
+        <div className="viewport-empty">
+          <div className="viewport-empty-icon">⬡</div>
+          <div className="viewport-empty-title">No frame selected</div>
+          <div className="viewport-empty-sub">Select a scene, then a frame to begin</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="sensor-data-view">
-      <div className="view-selector">
-        <div className="view-tabs">
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      {/* Tab bar */}
+      <div className="view-tabbar">
+        {TABS.map(tab => (
           <button
-            className={`view-button ${activeView === 'camera' ? 'active' : ''}`}
-            onClick={() => handleViewChange('camera')}
+            key={tab.id}
+            className={`view-tab ${activeView === tab.id ? 'active' : ''}`}
+            onClick={() => onViewChange?.(tab.id)}
           >
-            📷 Camera
+            <span style={{ fontFamily: 'monospace' }}>{tab.icon}</span>
+            {tab.label}
           </button>
+        ))}
+
+        <div className="view-tabbar-right">
           <button
-            className={`view-button ${activeView === 'lidar' ? 'active' : ''}`}
-            onClick={() => handleViewChange('lidar')}
-          >
-            🎯 LiDAR
-          </button>
-          <button
-            className={`view-button ${activeView === 'quality' ? 'active' : ''}`}
-            onClick={() => handleViewChange('quality')}
-          >
-            🔍 Quality
-          </button>
-        </div>
-        
-        <div className="layout-toggle">
-          <button
-            className={`layout-button ${layoutMode === 'single' ? 'active' : ''}`}
+            className={`layout-btn ${layoutMode === 'single' ? 'active' : ''}`}
             onClick={() => setLayoutMode('single')}
             title="Single view"
           >
-            ▢ Single
+            Single
           </button>
           <button
-            className={`layout-button ${layoutMode === 'split' ? 'active' : ''}`}
+            className={`layout-btn ${layoutMode === 'split' ? 'active' : ''}`}
             onClick={() => setLayoutMode('split')}
-            title="Split view (Camera + LiDAR)"
+            title="Split — Cameras + LiDAR"
           >
-            ▦ Split
+            Split
           </button>
         </div>
       </div>
 
+      {/* Content */}
       {layoutMode === 'single' ? (
         <div className="view-content">
-          {activeView === 'camera' && <CameraViewer frameId={frameId} />}
-          {activeView === 'lidar' && <LiDARViewer frameId={frameId} />}
+          {activeView === 'camera'  && <CameraViewer frameId={frameId} />}
+          {activeView === 'lidar'   && <LiDARViewer  frameId={frameId} />}
           {activeView === 'quality' && <QualityInspector frameId={frameId} />}
         </div>
       ) : (
         <div className="view-content split-view">
           <div className="split-panel split-left">
-            <div className="split-header">📷 Camera Views</div>
-            <CameraViewer frameId={frameId} />
+            <div className="split-header">◉ CAMERAS</div>
+            <div className="view-content">
+              <CameraViewer frameId={frameId} />
+            </div>
           </div>
           <div className="split-panel split-right">
-            <div className="split-header">🎯 LiDAR Point Cloud</div>
-            <LiDARViewer frameId={frameId} />
+            <div className="split-header">◎ LIDAR</div>
+            <div className="view-content">
+              <LiDARViewer frameId={frameId} />
+            </div>
           </div>
         </div>
       )}

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import SceneBrowser from './components/SceneBrowser';
 import FrameNavigator from './components/FrameNavigator';
 import SensorDataView from './components/SensorDataView';
@@ -8,133 +8,101 @@ function App() {
   const [selectedScene, setSelectedScene] = useState(null);
   const [selectedFrame, setSelectedFrame] = useState(null);
   const [currentFrameIndex, setCurrentFrameIndex] = useState(0);
+  const [totalFrames, setTotalFrames] = useState(0);
   const [activeView, setActiveView] = useState('camera');
-  const [showShortcuts, setShowShortcuts] = useState(false);
+  const frameNavRef = useRef(null);
 
   const handleSceneSelect = (scene) => {
     setSelectedScene(scene);
     setSelectedFrame(null);
     setCurrentFrameIndex(0);
+    setTotalFrames(0);
   };
 
-  const handleFrameSelect = (frame, index) => {
+  const handleFrameSelect = (frame, index, total) => {
     setSelectedFrame(frame);
     setCurrentFrameIndex(index);
+    if (total !== undefined) setTotalFrames(total);
   };
 
   useEffect(() => {
     const handleKeyPress = (e) => {
       if (e.target.tagName === 'INPUT') return;
-      
-      switch(e.key) {
-        case 'ArrowLeft':
-          document.querySelector('.nav-button:first-of-type:not(:disabled)')?.click();
-          break;
-        case 'ArrowRight':
-          document.querySelector('.nav-button:last-of-type:not(:disabled)')?.click();
-          break;
-        case '1':
-          setActiveView('camera');
-          break;
-        case '2':
-          setActiveView('lidar');
-          break;
-        case '3':
-          setActiveView('quality');
-          break;
-        case '?':
-          setShowShortcuts(prev => !prev);
-          break;
+      switch (e.key) {
+        case 'ArrowLeft':  frameNavRef.current?.prev(); break;
+        case 'ArrowRight': frameNavRef.current?.next(); break;
+        case '1': setActiveView('camera');  break;
+        case '2': setActiveView('lidar');   break;
+        case '3': setActiveView('quality'); break;
       }
     };
-    
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, []);
 
   return (
     <div className="app">
-      <header className="app-header">
-        <h1>nuScenes Data Visualization Tool</h1>
-        <p>Multi-Sensor Data Inspection for Autonomous Driving</p>
-      </header>
 
-      {/* Breadcrumb Navigation */}
-      {selectedScene && (
-        <div className="breadcrumb">
-          <span>Scene: {selectedScene.name}</span>
-          <span className="separator">›</span>
-          <span>Frame: {currentFrameIndex + 1} / {selectedScene.num_frames || '?'}</span>
-          {selectedFrame && (
-            <>
-              <span className="separator">›</span>
-              <span className="active">{activeView.charAt(0).toUpperCase() + activeView.slice(1)} View</span>
-            </>
-          )}
+      {/* ── TOP BAR ── */}
+      <div className="topbar">
+        <div className="topbar-logo">
+          <div className="topbar-logo-mark">ns</div>
+          <span className="topbar-logo-text">nuScenes <em>Viz</em></span>
         </div>
-      )}
 
-      <div className="app-container">
-        <aside className="sidebar">
-          <SceneBrowser 
+        {selectedScene && (
+          <>
+            <div className="topbar-sep" />
+            <div className="topbar-scene-info">
+              <span className="topbar-scene-name">{selectedScene.name}</span>
+              <span className="topbar-scene-sub">
+                {totalFrames > 0 ? `${totalFrames} frames` : selectedScene.description?.slice(0, 40)}
+              </span>
+            </div>
+          </>
+        )}
+
+        <div className="topbar-spacer" />
+
+        {selectedFrame && (
+          <div className="topbar-frame-badge">
+            FRAME <span className="frame-current">{String(currentFrameIndex + 1).padStart(4, '0')}</span>
+            {totalFrames > 0 && <span>/ {totalFrames}</span>}
+          </div>
+        )}
+
+        <div className="topbar-status">LIVE</div>
+      </div>
+
+      {/* ── BODY ── */}
+      <div className="app-body">
+
+        {/* Slim scene sidebar */}
+        <div className="scene-sidebar">
+          <SceneBrowser
             onSceneSelect={handleSceneSelect}
             selectedSceneId={selectedScene?.scene_id}
           />
-        </aside>
+        </div>
 
-        <main className="main-content">
-          <FrameNavigator 
-            sceneId={selectedScene?.scene_id}
-            onFrameSelect={handleFrameSelect}
-            currentFrameIndex={currentFrameIndex}
-          />
-
-          <SensorDataView 
-            frameId={selectedFrame?.frame_id} 
+        {/* Main viewport */}
+        <div className="main-viewport">
+          <SensorDataView
+            frameId={selectedFrame?.frame_id}
             activeView={activeView}
             onViewChange={setActiveView}
           />
-        </main>
+        </div>
       </div>
 
-      {/* Keyboard Shortcuts Panel */}
-      <div className="keyboard-shortcuts">
-        <button 
-          className="shortcuts-toggle"
-          onClick={() => setShowShortcuts(!showShortcuts)}
-        >
-          ⌨️ Shortcuts
-        </button>
-        {showShortcuts && (
-          <div className="shortcuts-panel">
-            <h4>Keyboard Shortcuts</h4>
-            <div className="shortcut-item">
-              <span>Previous Frame</span>
-              <span className="shortcut-key">←</span>
-            </div>
-            <div className="shortcut-item">
-              <span>Next Frame</span>
-              <span className="shortcut-key">→</span>
-            </div>
-            <div className="shortcut-item">
-              <span>Camera View</span>
-              <span className="shortcut-key">1</span>
-            </div>
-            <div className="shortcut-item">
-              <span>LiDAR View</span>
-              <span className="shortcut-key">2</span>
-            </div>
-            <div className="shortcut-item">
-              <span>Quality View</span>
-              <span className="shortcut-key">3</span>
-            </div>
-            <div className="shortcut-item">
-              <span>Toggle Shortcuts</span>
-              <span className="shortcut-key">?</span>
-            </div>
-          </div>
-        )}
-      </div>
+      {/* ── TIMELINE BAR ── */}
+      <FrameNavigator
+        ref={frameNavRef}
+        sceneId={selectedScene?.scene_id}
+        onFrameSelect={handleFrameSelect}
+        currentFrameIndex={currentFrameIndex}
+        currentFrame={selectedFrame}
+      />
     </div>
   );
 }

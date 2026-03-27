@@ -43,22 +43,19 @@ function QualityInspector({ frameId }) {
 
   const getStatusClass = (status) => {
     switch (status) {
-      case 'PASS':
-        return 'status-pass';
-      case 'WARNING':
-        return 'status-warning';
-      case 'FAIL':
-        return 'status-fail';
-      default:
-        return '';
+      case 'PASS':    return 'pass';
+      case 'WARNING': return 'warn';
+      case 'FAIL':    return 'fail';
+      default:        return '';
     }
   };
 
   if (!frameId) {
     return (
       <div className="quality-inspector">
-        <h3>Quality Inspection</h3>
-        <div className="info-message">Select a frame to view quality report</div>
+        <div className="viewport-empty">
+          <div className="viewport-empty-title">No frame selected</div>
+        </div>
       </div>
     );
   }
@@ -66,8 +63,10 @@ function QualityInspector({ frameId }) {
   if (loading) {
     return (
       <div className="quality-inspector">
-        <h3>Quality Inspection</h3>
-        <div className="loading">Running quality checks...</div>
+        <div className="state-loading">
+          <div className="loading-ring" />
+          Running quality checks…
+        </div>
       </div>
     );
   }
@@ -75,9 +74,10 @@ function QualityInspector({ frameId }) {
   if (error) {
     return (
       <div className="quality-inspector">
-        <h3>Quality Inspection</h3>
-        <div className="error">{error}</div>
-        <button onClick={loadQualityReport}>Retry</button>
+        <div className="state-error">
+          {error}
+          <button className="retry-btn" onClick={loadQualityReport}>Retry</button>
+        </div>
       </div>
     );
   }
@@ -85,44 +85,33 @@ function QualityInspector({ frameId }) {
   if (!qualityReport) {
     return (
       <div className="quality-inspector">
-        <h3>Quality Inspection</h3>
-        <div className="info-message">No quality report available</div>
+        <div className="state-loading">No report available</div>
       </div>
     );
   }
 
   return (
     <div className="quality-inspector">
-      <div className="quality-header">
-        <h3>Quality Inspection</h3>
-        <div className={`overall-status ${getStatusClass(qualityReport.status)}`}>
-          <span className="status-icon">{getStatusIcon(qualityReport.status)}</span>
-          <span className="status-text">{qualityReport.status}</span>
+      <div className="quality-inspector-header">
+        <span className="quality-inspector-title">Quality Inspection</span>
+        <div className={`quality-overall ${getStatusClass(qualityReport.status)}`}>
+          {getStatusIcon(qualityReport.status)} {qualityReport.status}
         </div>
       </div>
 
       <div className="quality-checks">
         {qualityReport.checks && qualityReport.checks.map((check, index) => (
-          <div key={index} className={`quality-check ${getStatusClass(check.status)}`}>
-            <div className="check-header">
-              <span className="check-icon">{getStatusIcon(check.status)}</span>
-              <span className="check-name">{check.check_name}</span>
-              <span className={`check-status ${getStatusClass(check.status)}`}>
-                {check.status}
-              </span>
+          <div key={index} className={`quality-check-item ${getStatusClass(check.status)}`}>
+            <span className="check-icon">{getStatusIcon(check.status)}</span>
+            <div className="check-body">
+              <div className="check-name">{check.check_name}</div>
+              <div className="check-message">{check.message}</div>
             </div>
-            <div className="check-message">{check.message}</div>
+            <span className={`check-badge ${getStatusClass(check.status)}`}>
+              {check.status}
+            </span>
           </div>
         ))}
-      </div>
-
-      <div className="quality-footer">
-        <button onClick={loadQualityReport} className="refresh-button">
-          🔄 Refresh Report
-        </button>
-        <div className="report-timestamp">
-          Last checked: {new Date(qualityReport.timestamp * 1000).toLocaleTimeString()}
-        </div>
       </div>
     </div>
   );

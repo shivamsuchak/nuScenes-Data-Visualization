@@ -95,54 +95,48 @@ function CameraViewer({ frameId }) {
 
   return (
     <div className="camera-viewer">
-      <div className="camera-header">
-        <h3>All Camera Views</h3>
-        <p className="camera-subtitle">360° Multi-Camera Perspective</p>
+      <div className="camera-grid-header">
+        <span className="camera-grid-title">
+          All Cameras
+          <span className="camera-grid-badge">6 channels · 360°</span>
+        </span>
       </div>
 
       <div className="camera-grid">
         {cameras.map((camera) => (
           <div key={camera.id} className="camera-grid-item">
             <div className="camera-label">{camera.label}</div>
-            
+
             {loadingStates[camera.id] && (
               <div className="camera-loading">
-                <div className="loading-spinner"></div>
-                <span>Loading...</span>
+                <div className="loading-ring" />
+                <span>{camera.id}</span>
               </div>
             )}
 
             {errors[camera.id] && (
               <div className="camera-error">
-                <span>⚠️</span>
-                <span>Failed to load</span>
+                <span>✕</span>
+                <span>no signal</span>
               </div>
             )}
 
             {!loadingStates[camera.id] && !errors[camera.id] && cameraData[camera.id]?.data_url && (
-              <div 
-                className="camera-image-wrapper"
-                onClick={() => handleCameraClick(camera.id)}
-              >
+              <div className="camera-image-wrapper" onClick={() => handleCameraClick(camera.id)}>
                 <img
                   src={apiService.getSensorImageUrl(cameraData[camera.id].data_url)}
-                  alt={`${camera.label} view`}
+                  alt={camera.label}
                   className="camera-grid-image"
-                  onError={() => {
-                    setErrors(prev => ({ ...prev, [camera.id]: 'Image load failed' }));
-                  }}
+                  onError={() => setErrors(prev => ({ ...prev, [camera.id]: 'load failed' }))}
                 />
                 <div className="camera-overlay">
-                  <span className="zoom-icon">🔍</span>
-                  <span>Click to enlarge</span>
+                  <div className="camera-overlay-icon">⤢</div>
                 </div>
               </div>
             )}
 
             {!loadingStates[camera.id] && !errors[camera.id] && !cameraData[camera.id] && (
-              <div className="camera-empty">
-                <span>No data</span>
-              </div>
+              <div className="camera-empty">no data</div>
             )}
           </div>
         ))}
@@ -152,44 +146,30 @@ function CameraViewer({ frameId }) {
       {fullscreenCamera && cameraData[fullscreenCamera] && (
         <div className="camera-fullscreen-modal" onClick={closeFullscreen}>
           <div className="fullscreen-content" onClick={(e) => e.stopPropagation()}>
-            <button className="fullscreen-close" onClick={closeFullscreen}>
-              ✕
-            </button>
-            
-            <button 
-              className="fullscreen-nav fullscreen-prev"
-              onClick={() => navigateFullscreen('prev')}
-            >
-              ‹
-            </button>
-            
+            <button className="fullscreen-close" onClick={closeFullscreen}>✕</button>
+
+            <button className="fullscreen-nav" onClick={() => navigateFullscreen('prev')}>‹</button>
+
             <div className="fullscreen-image-container">
-              <h3 className="fullscreen-title">
+              <div className="fullscreen-title">
                 {cameras.find(c => c.id === fullscreenCamera)?.label}
-              </h3>
+              </div>
               <img
                 src={apiService.getSensorImageUrl(cameraData[fullscreenCamera].data_url)}
-                alt={`${fullscreenCamera} fullscreen`}
+                alt={fullscreenCamera}
                 className="fullscreen-image"
               />
               {cameraData[fullscreenCamera].metadata?.timestamp && (
                 <div className="fullscreen-metadata">
-                  <span><strong>Timestamp:</strong> {new Date(cameraData[fullscreenCamera].metadata.timestamp * 1000).toLocaleString()}</span>
-                  <span><strong>Sensor:</strong> {fullscreenCamera}</span>
+                  <span>ts: {new Date(cameraData[fullscreenCamera].metadata.timestamp * 1000).toLocaleString()}</span>
+                  <span>channel: {fullscreenCamera}</span>
                 </div>
               )}
             </div>
-            
-            <button 
-              className="fullscreen-nav fullscreen-next"
-              onClick={() => navigateFullscreen('next')}
-            >
-              ›
-            </button>
-            
-            <div className="fullscreen-hint">
-              Use ← → arrow keys to navigate • ESC to close
-            </div>
+
+            <button className="fullscreen-nav" onClick={() => navigateFullscreen('next')}>›</button>
+
+            <div className="fullscreen-hint">← → navigate · ESC close</div>
           </div>
         </div>
       )}

@@ -99,7 +99,7 @@ function LiDARViewer({ frameId }) {
     const height = containerRef.current.clientHeight;
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x1a1a1a);
+    scene.background = new THREE.Color(0x080C14);
     sceneRef.current = scene;
 
     const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
@@ -274,8 +274,10 @@ function LiDARViewer({ frameId }) {
   if (!frameId) {
     return (
       <div className="lidar-viewer">
-        <h3>LiDAR Point Cloud</h3>
-        <div className="info-message">Select a frame to view LiDAR data</div>
+        <div className="viewport-empty">
+          <div className="viewport-empty-icon">◎</div>
+          <div className="viewport-empty-title">No frame selected</div>
+        </div>
       </div>
     );
   }
@@ -283,79 +285,55 @@ function LiDARViewer({ frameId }) {
   return (
     <div className="lidar-viewer">
       <div className="lidar-header">
-        <h3>LiDAR Point Cloud</h3>
-        {pointCount > 0 && (
-          <div className="point-count">{pointCount.toLocaleString()} points</div>
-        )}
+        <span className="lidar-title">LiDAR Point Cloud</span>
+        <div className="lidar-stats">
+          {pointCount > 0 && (
+            <span className="lidar-stat cyan">{pointCount.toLocaleString()} pts</span>
+          )}
+          <span className="lidar-stat">LIDAR_TOP</span>
+        </div>
       </div>
 
-      {/* Camera Presets */}
+      {/* Controls */}
       {!loading && !error && (
         <div className="lidar-controls">
-          <div className="camera-presets">
-            <span className="control-label">View:</span>
-            <button className="preset-btn" onClick={() => setCameraPreset('top')}>
-              📐 Top
-            </button>
-            <button className="preset-btn" onClick={() => setCameraPreset('side')}>
-              ↔️ Side
-            </button>
-            <button className="preset-btn" onClick={() => setCameraPreset('front')}>
-              ⬆️ Front
-            </button>
-            <button className="preset-btn" onClick={() => setCameraPreset('iso')}>
-              🔷 Isometric
-            </button>
-            <button className="preset-btn preset-reset" onClick={() => setCameraPreset('reset')}>
-              🔄 Reset
-            </button>
+          <div className="ctrl-group">
+            <span className="ctrl-group-label">VIEW</span>
+            <button className="ctrl-btn" onClick={() => setCameraPreset('top')}>Top</button>
+            <button className="ctrl-btn" onClick={() => setCameraPreset('side')}>Side</button>
+            <button className="ctrl-btn" onClick={() => setCameraPreset('front')}>Front</button>
+            <button className="ctrl-btn" onClick={() => setCameraPreset('iso')}>Iso</button>
+            <button className="ctrl-btn" onClick={() => setCameraPreset('reset')}>Reset</button>
           </div>
-          
-          <div className="lidar-toggles">
-            <span className="control-label">Display:</span>
-            <button 
-              className={`toggle-btn ${showGrid ? 'active' : ''}`}
-              onClick={toggleGrid}
-            >
-              {showGrid ? '✓' : '○'} Grid
-            </button>
-            <button 
-              className={`toggle-btn ${showAxes ? 'active' : ''}`}
-              onClick={toggleAxes}
-            >
-              {showAxes ? '✓' : '○'} Axes
-            </button>
+          <div className="ctrl-group">
+            <span className="ctrl-group-label">SHOW</span>
+            <button className={`ctrl-btn ${showGrid ? 'active' : ''}`} onClick={toggleGrid}>Grid</button>
+            <button className={`ctrl-btn ${showAxes ? 'active' : ''}`} onClick={toggleAxes}>Axes</button>
           </div>
         </div>
       )}
 
       {loading && (
-        <div className="loading">
-          Loading LiDAR data...
-          <p className="loading-detail">Rendering point cloud...</p>
+        <div className="lidar-loading">
+          <div className="loading-ring" />
+          Loading point cloud…
         </div>
       )}
 
       {error && (
-        <div className="error">{error}</div>
+        <div className="lidar-error">{error}</div>
       )}
 
-      <div 
-        ref={containerRef} 
+      <div
+        ref={containerRef}
         className="lidar-canvas"
-        style={{ width: '100%', height: '500px' }}
+        style={{ width: '100%', height: '480px' }}
       />
 
-      <div className="lidar-controls-info">
-        <div className="control-info-item">
-          <strong>🖱️ Controls:</strong> Drag to rotate • Scroll to zoom
-        </div>
-        <div className="control-info-item">
-          <strong>🎨 Color:</strong> Height-based (blue=low, red=high)
-        </div>
-        <div className="control-info-item">
-          <strong>💡 Tip:</strong> Use preset views for quick navigation
-        </div>
+      <div className="lidar-info-bar">
+        <div className="lidar-info-item"><strong>Rotate</strong> drag</div>
+        <div className="lidar-info-item"><strong>Zoom</strong> scroll</div>
+        <div className="lidar-info-item"><strong>Color</strong> height-based</div>
       </div>
     </div>
   );
