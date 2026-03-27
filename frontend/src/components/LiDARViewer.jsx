@@ -82,22 +82,24 @@ function LiDARViewer({ frameId }) {
     }
   };
 
+  // Initialize Three.js scene ONCE on mount — preserves camera state across frame changes
   useEffect(() => {
-    if (frameId) {
-      initThreeJS();
+    initThreeJS();
+    return () => { cleanup(); };
+  }, []);
+
+  // Load new point cloud data whenever frameId changes (without resetting the scene/camera)
+  useEffect(() => {
+    if (frameId && sceneRef.current) {
       loadLiDARData();
     }
-
-    return () => {
-      cleanup();
-    };
   }, [frameId]);
 
   const initThreeJS = () => {
     if (!containerRef.current) return;
 
-    const width = containerRef.current.clientWidth;
-    const height = containerRef.current.clientHeight;
+    const width = containerRef.current.clientWidth || 300;
+    const height = containerRef.current.clientHeight || 300;
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x080C14);

@@ -519,6 +519,7 @@ body {
   background: var(--border);
   padding: 0;
   overflow: hidden;
+  overflow-y: hidden;
 }
 
 .playback-panel {
