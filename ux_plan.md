@@ -1,15 +1,380 @@
-# 🧠 UI/UX Expert Agent for Visualization Usability
+# 🎨 PROFESSIONAL REDESIGN PLAN - nuScenes Visualization Tool
 
-## 🎯 Purpose
-This agent is designed to evaluate and improve the usability of a complex visualization system, particularly for Scene → Frame → Sensor workflows with interactive components like LiDAR and camera views.
+## 🎯 Mission
+Transform the current AI-generated-feeling interface into a professional, production-grade autonomous driving data visualization platform inspired by industry leaders like Foxglove, Scale AI, Waymo, and CVAT.
 
 ---
 
-# 📋 EXECUTION PLAN - Multi-Camera Grid View & Enhanced LiDAR
+## 🔍 Current Issues Analysis
 
-## User Requirements
-1. **All 6 cameras visible simultaneously** - Grid layout showing all camera angles at once
-2. **Better LiDAR visualization** - Enhanced controls, presets, and interaction
+### What Makes It Feel "AI-Generated"
+1. **Generic Design System** - Overuse of blue accent (#3b82f6) everywhere
+2. **Cookie-cutter Layout** - Standard sidebar + main content pattern
+3. **Predictable Spacing** - Uniform padding/margins (var(--space-4) everywhere)
+4. **Generic Typography** - System fonts without character
+5. **Flat Hierarchy** - Everything has equal visual weight
+6. **Sterile Interactions** - Hover effects are identical across all elements
+7. **No Brand Identity** - Could be any data visualization tool
+8. **Overdesigned Controls** - Too many rounded corners, shadows, glows
+9. **Lack of Data Focus** - UI competes with the actual data
+10. **Missing Context** - No sense of autonomous driving domain
+
+---
+
+## 🎯 Design Inspiration Research
+
+### Foxglove Studio (Best-in-class robotics visualization)
+- **Layout**: Tab-based organization (Perception, Planning, Controls, Diagnostics)
+- **Color Scheme**: Dark theme with purple/magenta accents (#8B5CF6, #D946EF)
+- **Data First**: Minimal chrome, maximum data visibility
+- **Professional**: Clean, technical, purpose-built
+- **Panels**: Modular, resizable panels for different data types
+
+### Scale AI (Annotation platform)
+- **Utilitarian**: Function over form
+- **High Density**: Efficient use of screen space
+- **Tool-focused**: Prominent tool palette
+- **Muted Colors**: Grays with selective color for data
+- **Professional**: Enterprise-grade feel
+
+### Waymo (Autonomous driving leader)
+- **Minimalist**: Clean, uncluttered
+- **Spatial Awareness**: Strong sense of 3D space
+- **Confidence**: Bold typography, clear hierarchy
+- **Accessible**: High contrast, clear labels
+
+---
+
+## 🎨 NEW DESIGN DIRECTION
+
+### Visual Identity
+**Theme**: "Technical Precision" - A professional tool for autonomous driving engineers
+
+**Color Palette** (Moving away from generic blue):
+```css
+/* Primary - Deep Purple (Robotics/AV industry standard) */
+--primary: #7C3AED;        /* Vivid purple */
+--primary-dark: #5B21B6;   /* Deep purple */
+--primary-light: #A78BFA;  /* Light purple */
+
+/* Accent - Cyan (LiDAR/sensor data) */
+--accent: #06B6D4;         /* Cyan */
+--accent-dark: #0891B2;    /* Dark cyan */
+
+/* Neutrals - Cooler grays */
+--bg-primary: #0A0E1A;     /* Almost black with blue tint */
+--bg-secondary: #111827;   /* Dark slate */
+--bg-tertiary: #1F2937;    /* Medium slate */
+--bg-elevated: #374151;    /* Light slate */
+
+/* Semantic */
+--success: #10B981;        /* Green */
+--warning: #F59E0B;        /* Amber */
+--error: #EF4444;          /* Red */
+--info: #3B82F6;           /* Blue (limited use) */
+
+/* Text */
+--text-primary: #F9FAFB;   /* Almost white */
+--text-secondary: #D1D5DB; /* Light gray */
+--text-tertiary: #9CA3AF;  /* Medium gray */
+```
+
+**Typography**:
+```css
+/* Technical, monospace for data */
+--font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+
+/* Clean sans-serif for UI */
+--font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+/* Headings - slightly condensed */
+--font-display: 'Inter Tight', 'Inter', sans-serif;
+```
+
+---
+
+## 📐 NEW LAYOUT ARCHITECTURE
+
+### Top-Level Structure
+```
+┌─────────────────────────────────────────────────────────────┐
+│ HEADER: Logo | Scene Info | Frame Nav | View Mode | Status  │
+├──────────┬──────────────────────────────────────────────────┤
+│          │                                                   │
+│  SCENE   │              MAIN VIEWPORT                        │
+│  LIST    │         (Cameras / LiDAR / Split)                │
+│          │                                                   │
+│  (Slim)  │                                                   │
+│          │                                                   │
+├──────────┴──────────────────────────────────────────────────┤
+│ TIMELINE: Frame scrubber with thumbnails                    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Key Changes from Current Design
+1. **Horizontal Header** - Not sidebar-first
+2. **Slim Scene List** - Collapsible, icon-based
+3. **Timeline at Bottom** - Like video editing software
+4. **Full-width Viewport** - Data takes center stage
+5. **Floating Panels** - Controls overlay the viewport when needed
+
+---
+
+## 🚀 STEP-BY-STEP REDESIGN PLAN
+
+### Phase 1: Foundation Redesign (Week 1)
+**Goal**: Establish new visual language and layout structure
+
+#### Step 1.1: New Color System
+- [ ] Replace all CSS variables with new color palette
+- [ ] Remove generic blue (#3b82f6) throughout
+- [ ] Implement purple primary, cyan accent
+- [ ] Adjust all component colors
+- [ ] Update semantic colors (success, warning, error)
+
+#### Step 1.2: Typography Overhaul
+- [ ] Import Inter and JetBrains Mono fonts
+- [ ] Update all font-family declarations
+- [ ] Establish type scale (12px, 14px, 16px, 18px, 24px, 32px)
+- [ ] Use monospace for all data/numbers
+- [ ] Use sans-serif for UI labels
+
+#### Step 1.3: Layout Restructure
+- [ ] Move sidebar to horizontal header
+- [ ] Create slim vertical scene list (left edge)
+- [ ] Add bottom timeline bar
+- [ ] Make viewport full-width
+- [ ] Remove unnecessary padding/margins
+
+---
+
+### Phase 2: Component Redesign (Week 1-2)
+**Goal**: Rebuild each component with new design language
+
+#### Step 2.1: Header Component (NEW)
+```
+┌─────────────────────────────────────────────────────────────┐
+│ [Logo] Scene: Boston-v1.0 | Frame: 0042/0850 | [⚙️] [👤]   │
+│        ├─ 850 frames                                         │
+│        └─ 6 cameras, 1 LiDAR                                │
+└─────────────────────────────────────────────────────────────┘
+```
+- [ ] Create new Header component
+- [ ] Logo + branding on left
+- [ ] Scene info in center
+- [ ] Frame counter prominent
+- [ ] Settings and user menu on right
+- [ ] Sticky header (always visible)
+
+#### Step 2.2: Scene Navigator (NEW)
+```
+┌──────┐
+│ [≡]  │ ← Hamburger to expand
+│      │
+│ [📁] │ ← Scene icons
+│ [📁] │
+│ [📁] │
+│      │
+└──────┘
+```
+- [ ] Create slim vertical scene list
+- [ ] Icon-only collapsed state
+- [ ] Expand on hover/click
+- [ ] Search functionality
+- [ ] Recent scenes at top
+
+#### Step 2.3: Timeline Scrubber (NEW)
+```
+┌─────────────────────────────────────────────────────────────┐
+│ [◀] ━━━━━━━●━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ [▶]  │
+│     0                    42                           850    │
+│     [thumb] [thumb] [thumb] [thumb] [thumb] [thumb]         │
+└─────────────────────────────────────────────────────────────┘
+```
+- [ ] Create timeline component at bottom
+- [ ] Scrubber with frame thumbnails
+- [ ] Playback controls
+- [ ] Frame number display
+- [ ] Quality indicators on timeline
+
+#### Step 2.4: Camera Grid Redesign
+- [ ] Remove rounded corners (use sharp edges)
+- [ ] Add thin borders (1px, not thick)
+- [ ] Remove excessive shadows
+- [ ] Use grid gaps of 2px (tight)
+- [ ] Camera labels: small, top-left overlay
+- [ ] Timestamp: bottom-right overlay
+- [ ] Remove "Click to enlarge" text (just icon)
+
+#### Step 2.5: LiDAR Viewer Redesign
+- [ ] Remove control panel background
+- [ ] Make controls floating/overlay
+- [ ] Use icon buttons (not text buttons)
+- [ ] Minimal UI, maximum 3D view
+- [ ] Add coordinate grid in 3D space
+- [ ] Show axes labels (X, Y, Z)
+- [ ] Add distance scale reference
+
+#### Step 2.6: View Mode Selector (NEW)
+```
+┌─────────────────────────────────┐
+│ [📷 Cameras] [🎯 LiDAR] [⚡ Split] [🔍 Quality] │
+└─────────────────────────────────┘
+```
+- [ ] Create tab-style view selector
+- [ ] Icons + labels
+- [ ] Active state: underline (not background)
+- [ ] Keyboard shortcuts (1, 2, 3, 4)
+
+---
+
+### Phase 3: Interaction Refinement (Week 2)
+**Goal**: Make interactions feel professional, not generic
+
+#### Step 3.1: Remove Generic Patterns
+- [ ] No more `transform: translateY(-1px)` on every hover
+- [ ] No more box-shadow on every hover
+- [ ] No more border-radius: 8px everywhere
+- [ ] No more transitions on everything
+
+#### Step 3.2: Purposeful Interactions
+- [ ] Buttons: Subtle background change only
+- [ ] Links: Underline on hover
+- [ ] Cards: Border color change only
+- [ ] Active states: Left border accent
+- [ ] Focus states: Outline, not glow
+
+#### Step 3.3: Micro-interactions
+- [ ] Frame navigation: Slide transition
+- [ ] Camera load: Fade in (no skeleton)
+- [ ] LiDAR: Smooth camera easing
+- [ ] Timeline: Snap to frame
+- [ ] Scene switch: Cross-fade
+
+---
+
+### Phase 4: Data-First Refinements (Week 2-3)
+**Goal**: Let the data shine, minimize UI chrome
+
+#### Step 4.1: Reduce Visual Noise
+- [ ] Remove all unnecessary borders
+- [ ] Use spacing instead of dividers
+- [ ] Reduce button sizes
+- [ ] Minimize labels (use tooltips)
+- [ ] Hide controls until hover
+
+#### Step 4.2: Information Density
+- [ ] Tighter spacing in lists
+- [ ] Smaller fonts for metadata
+- [ ] Compact frame counter
+- [ ] Inline status indicators
+- [ ] Remove redundant labels
+
+#### Step 4.3: Professional Polish
+- [ ] Consistent 2px/4px/8px/16px spacing
+- [ ] Sharp corners (0px or 2px radius max)
+- [ ] Thin borders (1px)
+- [ ] Subtle shadows (only for elevation)
+- [ ] Monospace for all numbers
+
+---
+
+### Phase 5: Domain-Specific Features (Week 3)
+**Goal**: Make it feel like an autonomous driving tool
+
+#### Step 5.1: AV-Specific UI Elements
+- [ ] Vehicle icon in header
+- [ ] Sensor status indicators
+- [ ] GPS coordinates display
+- [ ] Speed/heading indicators
+- [ ] Weather/lighting conditions
+
+#### Step 5.2: Technical Enhancements
+- [ ] Frame rate display (Hz)
+- [ ] Point cloud density stats
+- [ ] Sensor calibration status
+- [ ] Data quality metrics
+- [ ] Annotation overlays
+
+#### Step 5.3: Professional Tools
+- [ ] Measurement tools
+- [ ] Annotation mode
+- [ ] Export functionality
+- [ ] Comparison mode
+- [ ] Batch processing
+
+---
+
+## 📊 Success Criteria
+
+### Visual Quality
+- [ ] Doesn't look like every other dashboard
+- [ ] Has unique visual identity
+- [ ] Feels purpose-built for AV data
+- [ ] Professional, not generic
+- [ ] Data-focused, not UI-focused
+
+### Usability
+- [ ] Faster navigation (fewer clicks)
+- [ ] More screen space for data
+- [ ] Clearer information hierarchy
+- [ ] Better keyboard shortcuts
+- [ ] Responsive and performant
+
+### Technical
+- [ ] Clean, maintainable CSS
+- [ ] Consistent design tokens
+- [ ] Modular components
+- [ ] Accessible (WCAG AA)
+- [ ] Fast load times
+
+---
+
+## 🎯 Implementation Priority
+
+### Must Have (Week 1)
+1. New color palette
+2. Typography system
+3. Layout restructure
+4. Header component
+5. Timeline component
+
+### Should Have (Week 2)
+6. Camera grid redesign
+7. LiDAR viewer redesign
+8. Interaction refinements
+9. Scene navigator
+10. View mode selector
+
+### Nice to Have (Week 3)
+11. AV-specific features
+12. Professional tools
+13. Advanced interactions
+14. Performance optimizations
+15. Documentation
+
+---
+
+## 🚀 Next Steps
+
+1. **Review this plan** - Confirm direction with user
+2. **Start with colors** - Replace CSS variables
+3. **Import fonts** - Add Inter and JetBrains Mono
+4. **Restructure layout** - Header, timeline, slim sidebar
+5. **Rebuild components** - One at a time, systematically
+6. **Test and iterate** - Get feedback at each phase
+
+---
+
+## 📝 Notes
+
+- This is a **complete redesign**, not incremental improvements
+- Focus on **removing** generic patterns, not adding more
+- **Data first**, UI second
+- **Professional**, not flashy
+- **Purposeful**, not decorative
+
+Let's build something that looks like it was designed by autonomous driving engineers, for autonomous driving engineers.
 
 ---
 
