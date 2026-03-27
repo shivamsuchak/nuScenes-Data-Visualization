@@ -514,6 +514,7 @@ body {
 
 .view-content.playback-view {
   display: flex;
+  flex-direction: row;
   gap: 1px;
   background: var(--border);
   padding: 0;
@@ -525,10 +526,12 @@ body {
   flex-direction: column;
   overflow: hidden;
   min-width: 0;
+  min-height: 0;
+  width: 0;
   background: var(--bg-0);
 }
 
-.playback-cameras { flex: 1.4; }
+.playback-cameras { flex: 1.3; }
 .playback-lidar   { flex: 1; }
 
 .playback-panel-header {
@@ -556,6 +559,43 @@ body {
   min-height: 0;
   display: flex;
   flex-direction: column;
+}
+
+/* Compact camera grid inside playback view */
+.playback-panel-body .camera-grid {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.playback-panel-body .camera-grid-header {
+  display: none;
+}
+
+.playback-panel-body .lidar-header {
+  display: none;
+}
+
+.playback-panel-body .lidar-controls {
+  padding: var(--s1) 0;
+}
+
+.playback-panel-body .lidar-info-bar {
+  display: none;
+}
+
+.playback-panel-body .camera-viewer {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+}
+
+.playback-panel-body .lidar-viewer {
+  height: 100%;
+  min-height: 0;
+}
+
+.playback-panel-body .lidar-canvas {
+  flex: 1;
+  min-height: 0;
 }
 
 /* Split View */
@@ -1386,8 +1426,16 @@ body {
    RESPONSIVE
    ============================================ */
 
+@media (max-width: 1400px) {
+  .playback-panel-body .camera-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 1024px) {
   .camera-grid { grid-template-columns: repeat(2, 1fr); }
+  .playback-cameras { flex: 1; }
+  .playback-lidar   { flex: 1; }
 }
 
 @media (max-width: 768px) {
@@ -1395,8 +1443,18 @@ body {
   .camera-grid    { grid-template-columns: 1fr; }
   .view-content.split-view { flex-direction: column; }
   .view-content.playback-view { flex-direction: column; }
+  .playback-panel { width: auto; }
+  .playback-panel-body .camera-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
   .topbar-scene-info { display: none; }
   .topbar-status  { display: none; }
+}
+
+@media (max-width: 480px) {
+  .playback-panel-body .camera-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 /* ============================================
