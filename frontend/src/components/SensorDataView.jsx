@@ -14,7 +14,7 @@ function SensorDataView({ frameId, activeView = 'camera', onViewChange }) {
 
   if (!frameId) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <div className="sensor-wrapper">
         <div className="view-tabbar">
           {TABS.map(tab => (
             <button
@@ -22,7 +22,7 @@ function SensorDataView({ frameId, activeView = 'camera', onViewChange }) {
               className={`view-tab ${activeView === tab.id ? 'active' : ''}`}
               onClick={() => onViewChange?.(tab.id)}
             >
-              <span style={{ fontFamily: 'monospace' }}>{tab.icon}</span>
+              <span className="tab-icon">{tab.icon}</span>
               {tab.label}
             </button>
           ))}
@@ -37,7 +37,7 @@ function SensorDataView({ frameId, activeView = 'camera', onViewChange }) {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div className="sensor-wrapper">
       {/* Tab bar */}
       <div className="view-tabbar">
         {TABS.map(tab => (

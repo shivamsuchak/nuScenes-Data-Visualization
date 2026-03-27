@@ -20,6 +20,7 @@ function LiDARViewer({ frameId }) {
   const initialCameraPosition = useRef({ x: 0, y: 10, z: 30 });
   const gridHelperRef = useRef(null);
   const axesHelperRef = useRef(null);
+  const resizeObserverRef = useRef(null);
 
   const setCameraPreset = (preset) => {
     if (!cameraRef.current) return;
@@ -115,7 +116,7 @@ function LiDARViewer({ frameId }) {
     containerRef.current.innerHTML = '';
     containerRef.current.appendChild(renderer.domElement);
 
-    const gridHelper = new THREE.GridHelper(100, 20, 0x444444, 0x222222);
+    const gridHelper = new THREE.GridHelper(100, 20, 0x21262D, 0x161B22);
     gridHelperRef.current = gridHelper;
     scene.add(gridHelper);
 
@@ -128,6 +129,19 @@ function LiDARViewer({ frameId }) {
 
     setupMouseControls();
     animate();
+
+    // Auto-resize on container size change
+    const ro = new ResizeObserver(([entry]) => {
+      const w = entry.contentRect.width;
+      const h = entry.contentRect.height;
+      if (w > 0 && h > 0 && rendererRef.current && cameraRef.current) {
+        rendererRef.current.setSize(w, h);
+        cameraRef.current.aspect = w / h;
+        cameraRef.current.updateProjectionMatrix();
+      }
+    });
+    ro.observe(containerRef.current);
+    resizeObserverRef.current = ro;
   };
 
   const setupMouseControls = () => {
@@ -257,6 +271,10 @@ function LiDARViewer({ frameId }) {
   };
 
   const cleanup = () => {
+    if (resizeObserverRef.current) {
+      resizeObserverRef.current.disconnect();
+    }
+
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
     }
@@ -327,7 +345,7 @@ function LiDARViewer({ frameId }) {
       <div
         ref={containerRef}
         className="lidar-canvas"
-        style={{ width: '100%', height: '480px' }}
+        style={{ width: '100%', flex: 1, minHeight: '200px' }}
       />
 
       <div className="lidar-info-bar">
