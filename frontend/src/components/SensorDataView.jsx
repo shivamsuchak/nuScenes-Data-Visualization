@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import CameraViewer from './CameraViewer';
 import LiDARViewer from './LiDARViewer';
 import QualityInspector from './QualityInspector';
